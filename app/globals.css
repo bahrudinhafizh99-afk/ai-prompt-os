@@ -1,0 +1,59 @@
+@import "tailwindcss";
+
+:root {
+  --background: #0B1020;
+  --foreground: #F8FAFC;
+  --accent-purple: #A855F7;
+  --accent-blue: #3B82F6;
+  --accent-pink: #EC4899;
+  
+  --card: #151C2F;
+  --card-foreground: #F8FAFC;
+  
+  --border: #1E293B;
+  --input: #1E293B;
+  --ring: #3B82F6;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  
+  --color-accent-purple: var(--accent-purple);
+  --color-accent-blue: var(--accent-blue);
+  --color-accent-pink: var(--accent-pink);
+  
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+}
+
+* {
+  border-color: var(--border);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+}
+
+/* Futuristic Glows */
+.neon-border-purple {
+  border: 1px solid var(--accent-purple);
+  box-shadow: 0 0 10px rgba(168, 85, 247, 0.3);
+}
+
+.neon-border-blue {
+  border: 1px solid var(--accent-blue);
+  box-shadow: 0 0 10px rgba(59, 130, 246, 0.3);
+}
+
+.glow-text-blue {
+  text-shadow: 0 0 8px rgba(59, 130, 246, 0.5);
+}
