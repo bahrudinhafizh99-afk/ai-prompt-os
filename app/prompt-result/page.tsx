@@ -19,9 +19,11 @@ import {
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/components/AuthProvider";
 
 export default function PromptResult() {
   const router = useRouter();
+  const { user } = useAuth();
   const { generateMasterPrompt, setField, ...state } = usePromptStore();
   const [prompt, setPrompt] = useState("");
   const [copied, setCopied] = useState(false);
@@ -46,10 +48,13 @@ export default function PromptResult() {
   };
 
   const handleSaveToLibrary = async () => {
+    if (!user) return alert("You must be logged in to save.");
+    
     try {
       setSaving(true);
       const { error } = await supabase.from('prompts').insert([
         {
+          user_id: user.id,
           prompt_type: state.promptType,
           content: prompt,
           environment: state.environment,
@@ -59,7 +64,7 @@ export default function PromptResult() {
           motion_style: state.cameraMotion,
           platform: state.platform,
           tags: state.tags,
-          reference_url: state.referenceUrl // Saving reference URL
+          reference_url: state.referenceUrl
         }
       ]);
       if (error) throw error;

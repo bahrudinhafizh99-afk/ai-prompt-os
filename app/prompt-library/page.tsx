@@ -18,8 +18,10 @@ import {
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/components/AuthProvider";
 
 export default function PromptLibrary() {
+  const { user } = useAuth();
   const [prompts, setPrompts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -30,15 +32,19 @@ export default function PromptLibrary() {
   const [activeType, setActiveType] = useState<string>("All");
 
   useEffect(() => {
-    fetchPrompts();
-  }, []);
+    if (user) {
+      fetchPrompts();
+    }
+  }, [user]);
 
   async function fetchPrompts() {
+    if (!user) return;
     try {
       setLoading(true);
       const { data, error } = await supabase
         .from('prompts')
         .select('*')
+        .eq('user_id', user.id)
         .order('created_at', { ascending: false });
       
       if (error) throw error;
@@ -58,8 +64,9 @@ export default function PromptLibrary() {
 
   const handleDelete = async (id: string) => {
     if (!confirm("Delete this prompt from library?")) return;
+    if (!user) return;
     try {
-      const { error } = await supabase.from('prompts').delete().eq('id', id);
+      const { error } = await supabase.from('prompts').delete().eq('id', id).eq('user_id', user.id);
       if (error) throw error;
       fetchPrompts();
     } catch (e) {

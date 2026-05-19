@@ -4,11 +4,13 @@ import { useState, useEffect } from "react";
 import { UserCircle, Plus, ChevronLeft, Save, Sparkles, Smile, Info, Palette, Loader2, Trash2, Wand2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/lib/supabase";
+import { useAuth } from "@/components/AuthProvider";
 
 const personalityOptions = ["Luxury", "Cute", "Elegant", "Soft Spoken", "Confident", "Mysterious"];
 const nicheOptions = ["Lifestyle", "Fashion", "Travel", "Fitness", "Anime"];
 
 export default function CharacterStudio() {
+  const { user } = useAuth();
   const [isCreating, setIsCreating] = useState(false);
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(true);
@@ -30,15 +32,19 @@ export default function CharacterStudio() {
   });
 
   useEffect(() => {
-    fetchCharacters();
-  }, []);
+    if (user) {
+      fetchCharacters();
+    }
+  }, [user]);
 
   async function fetchCharacters() {
+    if (!user) return;
     try {
       setFetching(true);
       const { data, error } = await supabase
         .from('characters')
         .select('*')
+        .eq('user_id', user.id)
         .order('created_at', { ascending: false });
       
       if (error) throw error;
@@ -104,10 +110,14 @@ export default function CharacterStudio() {
 
   const handleSave = async () => {
     if (!formData.name) return alert("Character Name is required!");
+    if (!user) return alert("You must be logged in to save.");
     
     try {
       setLoading(true);
-      const { data, error } = await supabase.from('characters').insert([{ ...formData }]).select();
+      const { data, error } = await supabase.from('characters').insert([{ 
+        ...formData, 
+        user_id: user.id 
+      }]).select();
 
       if (error) {
         alert(`Save failed: ${error.message}`);
@@ -129,8 +139,9 @@ export default function CharacterStudio() {
 
   const handleDelete = async (id: string) => {
     if (!confirm("Are you sure you want to delete this character?")) return;
+    if (!user) return;
     try {
-      const { error } = await supabase.from('characters').delete().eq('id', id);
+      const { error } = await supabase.from('characters').delete().eq('id', id).eq('user_id', user.id);
       if (error) throw error;
       fetchCharacters();
     } catch (error) {
